@@ -14,7 +14,7 @@ Owner: Mercy Atta Gyamfi (0164) - Team Lead
     <version>0.1.0-phase1</version>
     <packaging>jar</packaging>
 
-    <name>COMPILER_GROUP_ONE Mini-Language Compiler</name>
+    <name>COMPILER_GROUP_FIFTEEN Mini-Language Compiler</name>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
