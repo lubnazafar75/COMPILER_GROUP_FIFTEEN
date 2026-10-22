@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-COMPILER_GROUP_ONE - build file for all five phases.
+COMPILER_GROUP_FIFTEEN - build file for all five phases.
 Owner: Mercy Atta Gyamfi (0164) - Team Lead
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
