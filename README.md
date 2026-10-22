@@ -1,4 +1,4 @@
-# COMPILER_GROUP_ONE — Mini-Language Compiler
+# COMPILER_GROUP_FIFTEEN — Mini-Language Compiler
 Term project: a compiler for the class mini language, built in five phases in this one repository.
 | Phase | Deliverable | Status | Deadline |
 |---|---|---|---|
