@@ -16,7 +16,7 @@ Term project: a compiler for the class mini language, built in five phases in th
 ## Run from a terminal
 ```
 mvn package
-java -jar target/compiler-group-one-0.1.0-phase1.jar --tokens samples/hello.mini
+java -jar target/COMPILER_GROUP_FIFTEEN-0.1.0-phase1.jar --tokens samples/hello.mini
 ```
 ## Project layout
 ```
