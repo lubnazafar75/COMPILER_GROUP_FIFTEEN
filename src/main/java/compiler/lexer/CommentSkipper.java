@@ -5,7 +5,7 @@ import compiler.error.ErrorReporter;
 public final class CommentSkipper {
     public boolean isCommentStart(SourceReader reader) {
         return reader.peek() == '/'
-            && (reader.peekNext() == '/'  reader.peekNext() == '*');
+            && (reader.peekNext() == '/' || reader.peekNext() == '*');
     }
     public void skip(SourceReader reader, ErrorReporter errors) {
         int line = reader.getLine();
