@@ -15,7 +15,7 @@ public final class StringScanner {
                 int escCol = reader.getColumn();
                 reader.advance();
                 char next = reader.peek();
-                if (next == '"'||  next == '\\' || next == 'n' || next == 't') {
+                if (next == '"' || next == '\\' || next == 'n' || next == 't') {
                     reader.advance();
                 } 
                 else if (next != '\n' && next != SourceReader.END) {
