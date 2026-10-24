@@ -1,0 +1,5 @@
+int x = 42 @ 7;
+int price = 12.;
+string s = "never closed;
+print x # y;
+/* this comment is never closed
