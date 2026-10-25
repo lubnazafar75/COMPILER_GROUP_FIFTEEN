@@ -1,11 +1,12 @@
+
 package compiler;
 
 import java.util.Set;
 
 class KeywordTable {
-    
-//tHis stores all reserved keywords supported by the language.
-//set provides fast membership checking and avoids duplicates.
+
+    //this stores all reserved keywords supported by the language.
+    //set provides fast membership checking and avoids duplicates.
     private static final Set<String> KEYWORDS = Set.of(
         "if",
         "else",
@@ -16,16 +17,16 @@ class KeywordTable {
         "print",
         "input"
     );
-    
-// it reads a word and determines whether it is a keyword or identifier.
+
+    //reads a word and determines whether it is a keyword or identifier.
     public Token scanIdentifierOrKeyword(
             Lexer lexer, String src, int cursor) {
 
         int start = cursor;
         int line = lexer.getLine();
         int column = lexer.getColumn();
-        
-// it continue reading while the character is valid in a word.
+
+        //it continues reading while the character is valid in a word.
         while (cursor < src.length()) {
             char ch = src.charAt(cursor);
 
@@ -37,15 +38,19 @@ class KeywordTable {
         }
 
         String word = src.substring(start, cursor);
-
         lexer.advanceCursor(cursor - start);
 
-        
-// Reserved words are keywords; other words are identifiers.
-        TokenType type = KEYWORDS.contains(word)
-                ? TokenType.KEYWORD
-                : TokenType.IDENTIFIER;
+        //classifies the word as a keyword or an identifier.
+        TokenType type = classifyWord(word);
 
         return new Token(type, word, line, column);
+    }
+
+    private TokenType classifyWord(String word) {
+        if (KEYWORDS.contains(word)) {
+            return TokenType.KEYWORD;
+        }
+
+        return TokenType.IDENTIFIER;
     }
 }
