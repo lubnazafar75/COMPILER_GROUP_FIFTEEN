@@ -1,164 +1,91 @@
 package compiler.lexer;
 
-import compiler.Token;
-import compiler.TokenType;
+import compiler.error.ErrorReporter;
 
-public class Lexer {
-    private final String src;
-    private int cursor = 0;
-    private int currentLine = 1;
-    private int currentColumn = 1;
+import java.util.ArrayList;
+import java.util.List;
 
-    // Sub-scanner delegates
-    private final StringScanner stringScanner;
-    private final CommentSkipper commentSkipper;
-    private final KeywordTable keywordTable;
-    private final NumberScanner numberScanner;
-    private final OperatorScanner operatorScanner;
+/**
+ * The scanner's main loop. Looks at the next character and hands the work
+ * to the right specialist scanner:
+ *
+ *   whitespace        -> skipped here
+ *   // or slash-star  -> CommentSkipper
+ *   "                 -> StringScanner
+ *   digit             -> NumberScanner
+ *   letter or _       -> KeywordTable (identifier / keyword)
+ *   operator/punct    -> OperatorScanner
+ *   anything else     -> ILLEGAL_CHARACTER error, skipped, scanning continues
+ *
+ * Owner: Philip Essel (0157) - Phase 1 Scanner Lead
+ */
+public final class Lexer {
 
-    public Lexer(String src) {
-        this.src = (src != null) ? src : "";
-        this.stringScanner = new StringScanner();
-        this.commentSkipper = new CommentSkipper();
-        this.keywordTable = new KeywordTable();
-        this.numberScanner = new NumberScanner();
-        this.operatorScanner = new OperatorScanner();
+    private final SourceReader reader;
+    private final ErrorReporter errors;
+
+    private final CommentSkipper commentSkipper = new CommentSkipper();
+    private final StringScanner stringScanner = new StringScanner();
+    private final NumberScanner numberScanner = new NumberScanner();
+    private final KeywordTable keywordTable = new KeywordTable();
+    private final OperatorScanner operatorScanner = new OperatorScanner();
+
+    public Lexer(String source) {
+        this(source, new ErrorReporter());
     }
 
+    public Lexer(String source, ErrorReporter errors) {
+        this.reader = new SourceReader(source);
+        this.errors = errors;
+    }
+
+    /** Returns the next token. After the input is used up, always returns EOF. */
     public Token nextToken() {
-        while (cursor < src.length()) {
-            char ch = src.charAt(cursor);
+        while (!reader.isAtEnd()) {
+            char c = reader.peek();
 
-            // Handle newline
-            if (ch == '\n') {
-                currentLine++;
-                currentColumn = 1;
-                cursor++;
+            if (Character.isWhitespace(c)) {
+                reader.advance();
                 continue;
             }
-
-            // Handle standard whitespace
-            if (Character.isWhitespace(ch)) {
-                currentColumn++;
-                cursor++;
+            if (commentSkipper.isCommentStart(reader)) {
+                commentSkipper.skip(reader, errors);
                 continue;
             }
-
-            // 1. Comments
-            if (commentSkipper.isCommentStart(src, cursor)) {
-                commentSkipper.skipComment(this, src, cursor);
-                continue;
+            if (c == '"') {
+                return stringScanner.scan(reader, errors);
+            }
+            if (Character.isDigit(c)) {
+                return numberScanner.scan(reader, errors);
+            }
+            if (KeywordTable.isIdentifierStart(c)) {
+                return keywordTable.scan(reader);
+            }
+            if (operatorScanner.canStart(reader)) {
+                return operatorScanner.scan(reader);
             }
 
-            // 2. String literals
-            if (ch == '"') {
-                return stringScanner.scanString(this, src, cursor);
-            }
-
-            // 3. Numbers
-            if (Character.isDigit(ch)) {
-                return numberScanner.scanNumber(this, src, cursor);
-            }
-
-            // 4. Identifiers & Keywords
-            if (Character.isLetter(ch) || ch == '_') {
-                return keywordTable.scanIdentifierOrKeyword(this, src, cursor);
-            }
-
-            // 5. Operators & Punctuation
-            if (operatorScanner.isOperatorOrPunctuation(ch)) {
-                return operatorScanner.scanOpOrPunct(this, src, cursor);
-            }
-
-            // 6. Unknown / Lexical Error fallback
-            LexicalError.reportIllegalCharacter(ch, currentLine, currentColumn);
-            advanceCursor(1);
+            // Error recovery: report, skip the bad character, keep scanning.
+            int line = reader.getLine();
+            int column = reader.getColumn();
+            reader.advance();
+            errors.illegalCharacter(c, line, column);
         }
-
-        return new Token(TokenType.EOF, "", currentLine, currentColumn);
+        return new Token(TokenType.EOF, "", reader.getLine(), reader.getColumn());
     }
 
-    public int getCursor() {
-        return cursor;
+    /** Scans the whole input. The returned list always ends with an EOF token. */
+    public List<Token> tokenize() {
+        List<Token> tokens = new ArrayList<>();
+        Token token;
+        do {
+            token = nextToken();
+            tokens.add(token);
+        } while (token.getType() != TokenType.EOF);
+        return tokens;
     }
 
-    public int getLine() {
-        return currentLine;
-    }
-
-    public int getColumn() {
-        return currentColumn;
-    }
-
-    public String getSource() {
-        return src;
-    }
-
-    public char peek() {
-        return (cursor < src.length()) ? src.charAt(cursor) : '\0';
-    }
-
-    public void advanceCursor(int count) {
-        this.cursor = Math.min(this.cursor + count, src.length());
-        this.currentColumn += count;
-    }
-
-    public void rawAdvanceCursorOnly(int count) {
-        this.cursor = Math.min(this.cursor + count, src.length());
-    }
-
-    public void setLineState(int line, int col) {
-        this.currentLine = line;
-        this.currentColumn = col;
-    }
-}
-
-// --------------------------------------------------------------------------
-// Package-private placeholder stubs so Lexer.java compiles independently.
-// When teammates add their own public classes in this package, these can be removed.
-// --------------------------------------------------------------------------
-
-class StringScanner {
-    public Token scanString(Lexer lexer, String src, int cursor) {
-        return new Token(TokenType.STRING, "", lexer.getLine(), lexer.getColumn());
-    }
-}
-
-class CommentSkipper {
-    public boolean isCommentStart(String src, int cursor) {
-        return cursor + 1 < src.length() && src.charAt(cursor) == '/' &&
-                (src.charAt(cursor + 1) == '/' || src.charAt(cursor + 1) == '*');
-    }
-
-    public void skipComment(Lexer lexer, String src, int cursor) {
-        lexer.advanceCursor(2);
-    }
-}
-
-class KeywordTable {
-    public Token scanIdentifierOrKeyword(Lexer lexer, String src, int cursor) {
-        return new Token(TokenType.IDENTIFIER, "", lexer.getLine(), lexer.getColumn());
-    }
-}
-
-class NumberScanner {
-    public Token scanNumber(Lexer lexer, String src, int cursor) {
-        return new Token(TokenType.NUMBER, "", lexer.getLine(), lexer.getColumn());
-    }
-}
-
-class OperatorScanner {
-    public boolean isOperatorOrPunctuation(char ch) {
-        return "+-*/%=<>!&|^~?:;,.()[]{}".indexOf(ch) != -1;
-    }
-
-    public Token scanOpOrPunct(Lexer lexer, String src, int cursor) {
-        return new Token(TokenType.OPERATOR, String.valueOf(src.charAt(cursor)), lexer.getLine(), lexer.getColumn());
-    }
-}
-
-class LexicalError {
-    public static void reportIllegalCharacter(char ch, int line, int column) {
-        System.err.printf("Lexical Error at [%d:%d]: Illegal character '%c'%n", line, column, ch);
+    public ErrorReporter getErrors() {
+        return errors;
     }
 }
