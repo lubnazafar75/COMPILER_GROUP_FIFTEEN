@@ -1,7 +1,11 @@
 package compiler.lexer;
+
 import compiler.error.ErrorReporter;
+import compiler.error.LexicalError;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
+
 import static compiler.lexer.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 /**
@@ -58,3 +62,4 @@ class LexicalErrorTest {
     void validProgramHasNoErrors() {
         assertFalse(TestUtil.errorsFor("int x = 5; print x;").hasErrors());
     }
+}
