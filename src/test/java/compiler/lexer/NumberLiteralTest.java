@@ -1,6 +1,7 @@
 package compiler.lexer;
 
 import compiler.error.ErrorReporter;
+import compiler.error.LexicalError;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Owner: Egmine James (0163)
  */
 class NumberLiteralTest {
+
     @Test
     void integerAndDecimal() {
         List<Token> tokens = TestUtil.tokenize("842 19.75");
@@ -32,7 +34,7 @@ class NumberLiteralTest {
     @Test
     void numberDirectlyFollowedByOperator() {
         assertEquals(List.of(INT_LITERAL, PLUS, INT_LITERAL, SEMICOLON, EOF),
-            TestUtil.types("3+4;"));
+                TestUtil.types("3+4;"));
     }
 
     @Test
