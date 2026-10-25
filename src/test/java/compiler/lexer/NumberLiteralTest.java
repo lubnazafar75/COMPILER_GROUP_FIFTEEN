@@ -1,7 +1,6 @@
 package compiler.lexer;
 
 import compiler.error.ErrorReporter;
-import compiler.error.LexicalError;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import static compiler.lexer.TokenType.*;
