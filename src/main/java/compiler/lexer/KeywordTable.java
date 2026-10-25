@@ -3,16 +3,11 @@ package compiler.lexer;
 import java.util.Map;
 
 /**
- * Scans identifiers and decides whether each word is a reserved keyword.
- *
- * Rule: an identifier starts with a letter or '_' and continues with
- * letters, digits or '_'. Keywords are case-sensitive ("if" is a keyword,
- * "If" is an identifier).
- *
- * To add a keyword: add a constant to TokenType, then one entry below.
- *
+ * Checks identifiers and recognizes reserved keywords.
+ * Keywords are case-sensitive.
  * Owner: Michael Addo (0159)
  */
+
 public final class KeywordTable {
 
     private static final Map<String, TokenType> KEYWORDS = Map.of(
