@@ -18,11 +18,23 @@ import compiler.ast.VariableExpr;
 import compiler.ast.WhileStmt;
 
 /**
- * Prints a syntax tree as an indented outline, one node per line.
- * Children are indented two spaces more than their parent.
+ * Prints a syntax tree as an indented outline, one node per line. Children
+ * are indented two spaces more than their parent.
+ *
+ *   Program
+ *     VarDecl int total
+ *       Literal 0
+ *     While
+ *       Condition
+ *         Binary >
+ *           Variable n
+ *           Literal 0
+ *       Body
+ *         ...
  *
  * It is a Visitor: it implements both visitor interfaces, so each node
  * type has exactly one method here that decides how it is printed.
+ *
  */
 public final class AstPrinter implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
@@ -60,4 +72,85 @@ public final class AstPrinter implements Expr.Visitor<Void>, Stmt.Visitor<Void> 
         child.accept(this);
         depth--;
     }
-}
+
+    // ---- Statements -----------------------------------------------------------
+
+    @Override
+    public Void visitVarDecl(VarDeclStmt stmt) {
+        line("VarDecl " + stmt.type().getLexeme() + " " + stmt.name().getLexeme());
+        if (stmt.initializer() != null) {
+            depth++;
+            stmt.initializer().accept(this);
+            depth--;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAssign(AssignStmt stmt) {
+        line("Assign " + stmt.name().getLexeme());
+        depth++;
+        stmt.value().accept(this);
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitInput(InputStmt stmt) {
+        line("Input " + stmt.name().getLexeme());
+        return null;
+    }
+
+    @Override
+    public Void visitPrint(PrintStmt stmt) {
+        line("Print");
+        depth++;
+        stmt.expression().accept(this);
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitIf(IfStmt stmt) {
+        line("If");
+        depth++;
+        labelledExpr("Condition", stmt.condition());
+        labelledStmt("Then", stmt.thenBranch());
+        if (stmt.elseBranch() != null) {
+            labelledStmt("Else", stmt.elseBranch());
+        }
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitWhile(WhileStmt stmt) {
+        line("While");
+        depth++;
+        labelledExpr("Condition", stmt.condition());
+        labelledStmt("Body", stmt.body());
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitReturn(ReturnStmt stmt) {
+        line("Return");
+        if (stmt.value() != null) {
+            depth++;
+            stmt.value().accept(this);
+            depth--;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitBlock(BlockStmt stmt) {
+        line("Block");
+        depth++;
+        for (Stmt inner : stmt.statements()) {
+            inner.accept(this);
+        }
+        depth--;
+        return null;
+    }
