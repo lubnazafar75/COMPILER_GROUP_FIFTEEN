@@ -154,3 +154,46 @@ public final class AstPrinter implements Expr.Visitor<Void>, Stmt.Visitor<Void> 
         depth--;
         return null;
     }
+
+    // ---- Expressions ----------------------------------------------------------
+
+    @Override
+    public Void visitBinary(BinaryExpr expr) {
+        line("Binary " + expr.operator().getLexeme());
+        depth++;
+        expr.left().accept(this);
+        expr.right().accept(this);
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitUnary(UnaryExpr expr) {
+        line("Unary " + expr.operator().getLexeme());
+        depth++;
+        expr.operand().accept(this);
+        depth--;
+        return null;
+    }
+
+    @Override
+    public Void visitLiteral(LiteralExpr expr) {
+        line("Literal " + expr.text());
+        return null;
+    }
+
+    @Override
+    public Void visitVariable(VariableExpr expr) {
+        line("Variable " + expr.name().getLexeme());
+        return null;
+    }
+
+    @Override
+    public Void visitGrouping(GroupingExpr expr) {
+        line("Group");
+        depth++;
+        expr.expression().accept(this);
+        depth--;
+        return null;
+    }
+}
