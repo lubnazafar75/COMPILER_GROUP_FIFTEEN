@@ -1,6 +1,10 @@
 package compiler.error;
 
-
+/**
+ * One problem found while scanning: what went wrong and where.
+ *
+ * Owner: Wrightner Owusu Ansah (0161)
+ */
 public final class LexicalError {
 
     /** The kinds of lexical problem the scanner can detect. */
