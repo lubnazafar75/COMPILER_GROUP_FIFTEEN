@@ -1,0 +1,19 @@
+int n;
+int total = 0;
+string msg = "Counting down:\n";
+input n;
+print msg;
+
+while (n > 0) {
+    print n;
+    total = total + n;
+    n = n - 1;
+}
+
+if (total >= 10 && total != 15) {
+    print "Big total";
+} else {
+    print "Small total";
+}
+
+return 0;
