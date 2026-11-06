@@ -1,0 +1,19 @@
+int age = 20;
+string name = "Daniel";
+
+input age;
+print name;
+print age + 5 * 2;
+
+if (age >= 18) {
+    print "Adult";
+} else {
+    print "Minor";
+}
+
+while (age > 0) {
+    age = age - 1;
+}
+
+print !false;
+return age;

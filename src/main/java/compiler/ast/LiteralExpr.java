@@ -1,0 +1,31 @@
+package compiler.ast;
+
+import compiler.lexer.Token;
+import compiler.lexer.TokenType;
+
+/**
+ * A literal value written directly in the program: 42, 19.75 or "hello".
+ *
+ * The token is kept (not just the value) so later phases still know the
+ * exact text and the line/column. For a string literal the text includes
+ * the surrounding quotes, exactly as the scanner produced it.
+ *
+ * Owner: Egmine James (0163)
+ */
+public record LiteralExpr(Token token) implements Expr {
+
+    /** INT_LITERAL, FLOAT_LITERAL or STRING_LITERAL. */
+    public TokenType type() {
+        return token.getType();
+    }
+
+    /** The literal exactly as written in the source. */
+    public String text() {
+        return token.getLexeme();
+    }
+
+    @Override
+    public <R> R accept(Expr.Visitor<R> visitor) {
+        return visitor.visitLiteral(this);
+    }
+}
