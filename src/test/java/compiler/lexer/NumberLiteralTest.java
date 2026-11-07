@@ -10,7 +10,6 @@ import static compiler.lexer.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Scanner Tests Part A (2/2): integer and decimal literals.
  *
  * Owner: Egmine James (0163)
  */
