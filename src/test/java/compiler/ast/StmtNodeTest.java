@@ -11,7 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-
+/**
+ * Phase 2 tests: statement nodes, Program, and their Visitor.
+ *
+ * Owner: Wrightner Owusu Ansah (0161)
+ */
 class StmtNodeTest {
 
     private static Token token(TokenType type, String lexeme) {

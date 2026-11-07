@@ -1,4 +1,3 @@
-
 package compiler.parser;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class PipelineTest {
 
     // Same program as samples/hello.mini. In a Java text block a backslash must be
-    // doubled, so the mini-language text "Counting down:\n" is written with \\n here.
+    // doubled, so the mini-language text  "Counting down:\n"  is written with \\n here.
     private static final String HELLO = """
             // hello.mini - valid sample program
             /* Reads a number, then counts
@@ -46,63 +45,63 @@ class PipelineTest {
             """;
 
     @Test
-    void helloPr9yMnTm4NSzvG9rrwjM2ec8xZgh1cafXH8() {
+    void helloProgramParsesWithoutErrors() {
         assertFalse(errorsFor(HELLO).hasErrors());
     }
 
     @Test
-    void helloPr9yMnTm4NSzvG9rrwjM2ec8xZgh1cafXH8() {
+    void helloProgramProducesTheExpectedTree() {
         assertEquals("""
                 Program
                   VarDecl int n
                   VarDecl int total
-                     Literal 0
+                    Literal 0
                   VarDecl string msg
-                     Literal "Counting down:\\n"
+                    Literal "Counting down:\\n"
                   Input n
                   Print
-                     Variable msg
+                    Variable msg
                   While
-                     Condition
-                       Binary >
+                    Condition
+                      Binary >
+                        Variable n
+                        Literal 0
+                    Body
+                      Block
+                        Print
                           Variable n
-                          Literal 0
-                     Body
-                       Block
-                          Print
-                             Variable n
-                          Assign total
-                            Binary +
-                              Variable total
-                              Variable n
-                          Assign n
-                            Binary -
-                              Variable n
-                              Literal 1
+                        Assign total
+                          Binary +
+                            Variable total
+                            Variable n
+                        Assign n
+                          Binary -
+                            Variable n
+                            Literal 1
                   If
-                     Condition
-                       Binary &&
-                          Binary >=
-                            Variable total
-                            Literal 10
-                          Binary !=
-                            Variable total
-                            Literal 15
-                     Then
-                       Block
-                          Print
-                             Literal "Big total"
-                     Else
-                       Block
-                          Print
-                             Literal "Small total"
+                    Condition
+                      Binary &&
+                        Binary >=
+                          Variable total
+                          Literal 10
+                        Binary !=
+                          Variable total
+                          Literal 15
+                    Then
+                      Block
+                        Print
+                          Literal "Big total"
+                    Else
+                      Block
+                        Print
+                          Literal "Small total"
                   Return
-                     Literal 0
+                    Literal 0
                 """, tree(HELLO));
     }
 
     @Test
-    void par9yMnTm4NSzvG9rrwjM2ec8xZgh1cafXH8() {
+    void parsingTwiceGivesTheSameTree() {
         assertEquals(tree(HELLO), tree(HELLO));
     }
 }
