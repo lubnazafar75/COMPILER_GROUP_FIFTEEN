@@ -1,3 +1,4 @@
+
 package compiler.util;
 
 import java.util.List;
@@ -20,8 +21,9 @@ import compiler.ast.VariableExpr;
 import compiler.lexer.Token;
 import compiler.lexer.TokenType;
 
-
 class AstPrinterTest {
+
+    private final AstPrinter printer = new AstPrinter();
 
     private static Token token(TokenType type, String lexeme) {
         return new Token(type, lexeme, 1, 1);
@@ -36,103 +38,139 @@ class AstPrinterTest {
     }
 
     private static Stmt print(Expr expression) {
-        return new PrintStmt(token(TokenType.PRINT, "print"), expression);
+        return new PrintStmt(expression);
     }
 
     @Test
     void emptyProgram() {
-        assertEquals("Program\n", AstPrinter.print(new Program(List.of())));
+        assertEquals("Program\n", printer.print(new Program(List.of())));
     }
 
     @Test
-    void childrenAreIndentedTwoSpacesPerLevel() {
-        Expr sum = new BinaryExpr(number("1"), token(TokenType.PLUS, "+"), variable("x"));
+    void childrenArePrintedInTheCorrectOrder() {
+        Expr sum = new BinaryExpr(
+                number("1"),
+                token(TokenType.PLUS, "+"),
+                variable("x")
+        );
+
         Program program = new Program(List.of(print(sum)));
-        assertEquals("""
-                Program
-                  Print
-                    Binary +
-                      Literal 1
-                      Variable x
-                """, AstPrinter.print(program));
+
+        assertEquals(
+                "Program\n" +
+                        "  Print\n" +
+                        "    Binary +\n" +
+                        "      Literal 1\n" +
+                        "      Variable x\n",
+                printer.print(program)
+        );
     }
 
     @Test
     void unaryAndGroupingNodes() {
-        Expr negated = new UnaryExpr(token(TokenType.MINUS, "-"), new GroupingExpr(variable("a")));
-        assertEquals("""
-                Program
-                  Print
-                    Unary -
-                      Group
-                        Variable a
-                """, AstPrinter.print(new Program(List.of(print(negated)))));
+        Expr negated = new UnaryExpr(
+                token(TokenType.MINUS, "-"),
+                new GroupingExpr(variable("a"))
+        );
+
+        assertEquals(
+                "Program\n" +
+                        "  Print\n" +
+                        "    Unary -\n" +
+                        "      Group\n" +
+                        "        Variable a\n",
+                printer.print(new Program(List.of(print(negated))))
+        );
     }
 
     @Test
     void declarationWithAndWithoutInitializer() {
         Token intType = token(TokenType.INT, "int");
+
         Program program = new Program(List.of(
                 new VarDeclStmt(intType, token(TokenType.IDENTIFIER, "a"), null),
-                new VarDeclStmt(intType, token(TokenType.IDENTIFIER, "b"), number("7"))));
-        assertEquals("""
-                Program
-                  VarDecl int a
-                  VarDecl int b
-                    Literal 7
-                """, AstPrinter.print(program));
+                new VarDeclStmt(intType, token(TokenType.IDENTIFIER, "b"), number("7"))
+        ));
+
+        assertEquals(
+                "Program\n" +
+                        "  VarDecl int a\n" +
+                        "  VarDecl int b\n" +
+                        "    Literal 7\n",
+                printer.print(program)
+        );
     }
 
     @Test
     void ifWithoutElsePrintsNoElseSection() {
-        Stmt statement = new IfStmt(token(TokenType.IF, "if"), variable("ok"), print(number("1")), null);
-        assertEquals("""
-                Program
-                  If
-                    Condition
-                      Variable ok
-                    Then
-                      Print
-                        Literal 1
-                """, AstPrinter.print(new Program(List.of(statement))));
+        Stmt statement = new IfStmt(
+                variable("ok"),
+                print(number("1")),
+                null
+        );
+
+        assertEquals(
+                "Program\n" +
+                        "  If\n" +
+                        "    Condition\n" +
+                        "      Variable ok\n" +
+                        "    Then\n" +
+                        "      Print\n" +
+                        "        Literal 1\n",
+                printer.print(new Program(List.of(statement)))
+        );
     }
 
     @Test
     void ifWithElsePrintsBothBranches() {
-        Stmt statement = new IfStmt(token(TokenType.IF, "if"), variable("ok"),
-                print(number("1")), print(number("2")));
-        assertEquals("""
-                Program
-                  If
-                    Condition
-                      Variable ok
-                    Then
-                      Print
-                        Literal 1
-                    Else
-                      Print
-                        Literal 2
-                """, AstPrinter.print(new Program(List.of(statement))));
+        Stmt statement = new IfStmt(
+                variable("ok"),
+                print(number("1")),
+                print(number("2"))
+        );
+
+        assertEquals(
+                "Program\n" +
+                        "  If\n" +
+                        "    Condition\n" +
+                        "      Variable ok\n" +
+                        "    Then\n" +
+                        "      Print\n" +
+                        "        Literal 1\n" +
+                        "    Else\n" +
+                        "      Print\n" +
+                        "        Literal 2\n",
+                printer.print(new Program(List.of(statement)))
+        );
     }
 
     @Test
     void returnWithAndWithoutValue() {
-        Token keyword = token(TokenType.RETURN, "return");
         Program program = new Program(List.of(
-                new ReturnStmt(keyword, number("0")),
-                new ReturnStmt(keyword, null)));
-        assertEquals("""
-                Program
-                  Return
-                    Literal 0
-                  Return
-                """, AstPrinter.print(program));
+                new ReturnStmt(number("0")),
+                new ReturnStmt(null)
+        ));
+
+        assertEquals(
+                "Program\n" +
+                        "  Return\n" +
+                        "    Literal 0\n" +
+                        "  Return\n",
+                printer.print(program)
+        );
     }
 
     @Test
     void stringLiteralsKeepTheirQuotes() {
-        Expr text = new LiteralExpr(token(TokenType.STRING_LITERAL, "\"hello\""));
-        assertEquals("Program\n  Print\n    Literal \"hello\"\n",
-                AstPrinter.print(new Program(List.of(print(text)))));
+        Expr text = new LiteralExpr(
+                token(TokenType.STRING_LITERAL, "\"hello\"")
+        );
+
+        assertEquals(
+                "Program\n" +
+                        "  Print\n" +
+                        "    Literal \"hello\"\n",
+                printer.print(new Program(List.of(print(text))))
+        );
     }
 }

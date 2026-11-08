@@ -1,17 +1,12 @@
 package compiler.ast;
 
-import compiler.lexer.Token;
 
 import java.util.List;
 
 /**
- * A group of statements between braces:  { ... }
- *
- * The constructor stores an unmodifiable copy of the list, so a block can
- * never change after the parser has built it.
- *
+ * Represents a block containing multiple statements.
  */
-public record BlockStmt(Token open, List<Stmt> statements) implements Stmt {
+public record BlockStmt(List<Stmt> statements) implements Stmt {
 
     public BlockStmt {
         statements = List.copyOf(statements);

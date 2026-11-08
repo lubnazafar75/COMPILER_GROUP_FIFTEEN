@@ -1,12 +1,15 @@
 package compiler.ast;
 
+
 import compiler.lexer.Token;
 
 /**
- * Stores a value in an existing variable:  n = n - 1;
- *
+ * Represents assigning a value to a variable.
  */
-public record AssignStmt(Token name, Expr value) implements Stmt {
+public record AssignStmt(
+        Token name,
+        Expr value
+) implements Stmt {
 
     @Override
     public <R> R accept(Stmt.Visitor<R> visitor) {
