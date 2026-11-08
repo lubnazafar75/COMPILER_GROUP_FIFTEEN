@@ -1,5 +1,5 @@
-
 package compiler.parser;
+
 
 /**
  * Exception thrown when the parser encounters invalid syntax.

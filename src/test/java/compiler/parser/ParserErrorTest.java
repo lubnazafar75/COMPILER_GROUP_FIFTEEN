@@ -47,8 +47,8 @@ class ParserErrorTest {
     void parsingContinuesAfterAMissingSemicolon() {
         assertEquals("""
                 Program
-                Print
-                Variable x
+                  Print
+                    Variable x
                 """, tree("int x = 5\nprint x;"));
     }
 
@@ -114,7 +114,9 @@ class ParserErrorTest {
         );
 
         assertEquals(
-                "Program\nPrint\nLiteral 1\n",
+                "Program\n" +
+                        "  Print\n" +
+                        "    Literal 1\n",
                 tree("print 1; }")
         );
     }
@@ -150,7 +152,6 @@ class ParserErrorTest {
                 print (x + 1;
                 print "done";
                 """;
-
         SyntaxErrorReporter errors = errorsFor(source);
 
         assertEquals(5, errors.count());
@@ -167,8 +168,8 @@ class ParserErrorTest {
     void goodStatementsBetweenBadOnesAreKept() {
         assertEquals("""
                 Program
-                Print
-                Literal 1
+                  Print
+                    Literal 1
                 """, tree("int x = ;\nprint 1;\nint y = ;"));
 
         assertEquals(
@@ -181,9 +182,9 @@ class ParserErrorTest {
     void anErrorInsideABlockDoesNotLoseTheRestOfTheBlock() {
         assertEquals("""
                 Program
-                Block
-                Assign y
-                Literal 2
+                  Block
+                    Assign y
+                      Literal 2
                 """, tree("{ x = ; y = 2; }"));
 
         assertEquals(1, errorsFor("{ x = ; y = 2; }").count());

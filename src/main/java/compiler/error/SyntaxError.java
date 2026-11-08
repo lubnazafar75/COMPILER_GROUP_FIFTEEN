@@ -17,4 +17,9 @@ public record SyntaxError(String message, int line, int column) {
     public int getColumn() {
         return column;
     }
+
+    @Override
+    public String toString() {
+        return "Line " + line + ", Col " + column + ": " + message;
+    }
 }

@@ -45,7 +45,7 @@ public final class StatementParser {
         }
 
         if (tokens.match(TokenType.WHILE)) {
-            return whileStatement();
+            return whileStatement(tokens.previous());
         }
 
         if (tokens.match(TokenType.RETURN)) {
@@ -152,7 +152,7 @@ public final class StatementParser {
         return new IfStmt(condition, thenBranch, elseBranch);
     }
 
-    private Stmt whileStatement() {
+    private Stmt whileStatement(Token keyword) {
         tokens.consume(
                 TokenType.LPAREN,
                 "'(' after 'while'"
@@ -167,7 +167,7 @@ public final class StatementParser {
 
         Stmt body = parseStatement();
 
-        return new WhileStmt(condition, body);
+        return new WhileStmt(keyword, condition, body);
     }
 
     private Stmt returnStatement() {

@@ -1,5 +1,5 @@
-
 package compiler.ast;
+
 
 /**
  * Base interface for every statement node in the syntax tree.

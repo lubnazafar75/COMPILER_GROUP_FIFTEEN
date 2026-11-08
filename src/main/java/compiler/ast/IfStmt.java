@@ -1,5 +1,5 @@
-
 package compiler.ast;
+
 
 /**
  * Represents an if statement with an optional else branch.

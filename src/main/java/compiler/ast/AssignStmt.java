@@ -1,5 +1,5 @@
-
 package compiler.ast;
+
 
 import compiler.lexer.Token;
 
