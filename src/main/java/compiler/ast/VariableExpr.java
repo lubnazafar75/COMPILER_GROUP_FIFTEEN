@@ -1,10 +1,14 @@
+
 package compiler.ast;
 
 import compiler.lexer.Token;
 
 /**
- * The use of a variable inside an expression: the x in x + 1.
- * Phase 3 (semantic analysis) will check that the variable was declared.
+ * The use of a variable inside an expression.
+ * Example: the x in x + 1.
+ *
+ * Phase 3 (semantic analysis) will check whether
+ * the variable was declared.
  *
  * Owner: Egmine James (0163)
  */

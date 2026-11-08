@@ -1,13 +1,11 @@
+
+package compiler.ast;
+
 import compiler.lexer.Token;
 
 /**
- * An expression with two operands and an operator between them,
- * for example a + b or total >= 10 && n != 0.
- *
- * A record is a short way of writing a class that only holds data.
- * Java automatically generates the constructor, getters
- * (left(), operator(), right()), equals(), hashCode(), and toString()
- * for us.
+ * An expression with two operands and an operator between them.
+ * Examples: a + b, total >= 10 && n != 0.
  *
  * Owner: Egmine James (0163)
  */

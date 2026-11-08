@@ -1,8 +1,12 @@
+
 package compiler.ast;
 
 /**
- * An expression wrapped in parentheses: (a + b).
- * Keeping this node records that the programmer wrote the brackets.
+ * An expression wrapped in parentheses.
+ * Example: (a + b).
+ *
+ * Keeping this node records that the programmer wrote
+ * the parentheses.
  *
  * Owner: Egmine James (0163)
  */
