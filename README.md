@@ -1,3 +1,4 @@
+
 # COMPILER_GROUP_FIFTEEN — Mini-Language Compiler
 
 Term project (Group 15): a compiler for the class mini language, developed in five phases in one repository.
@@ -43,22 +44,26 @@ java -jar target/COMPILER_GROUP_FIFTEEN-0.1.0-phase1.jar --tokens samples/hello.
 ## Project layout
 
 ```text
-src/main/java/compiler/
-    Main.java                 CLI entry point
-    ast/                      Abstract syntax tree components
-    lexer/                    Phase 1: lexical analysis
-    parser/                   Phase 2: syntax analysis
-    semantic/                 Phase 3: semantic analysis
-    ir/                       Phase 3: intermediate representation
-    error/                    Error handling and reporting
-    util/                     Compiler utility classes
-
-src/test/java/compiler/
-    ast/                      AST tests
-    lexer/                    Scanner tests
-    parser/                   Parser tests
-    semantic/                 Semantic analysis tests
-    ir/                       Intermediate representation tests
+src/
+├── main/
+│   └── java/
+│       └── compiler/
+│           ├── Main.java
+│           ├── ast/          Abstract syntax tree components
+│           ├── lexer/        Phase 1: lexical analysis
+│           ├── parser/       Phase 2: syntax analysis
+│           ├── semantic/     Phase 3: semantic analysis
+│           ├── ir/           Phase 3: intermediate representation
+│           ├── error/        Error handling and reporting
+│           └── util/         Compiler utility classes
+└── test/
+    └── java/
+        └── compiler/
+            ├── ast/          AST tests
+            ├── lexer/        Scanner tests
+            ├── parser/       Parser tests
+            ├── semantic/     Semantic analysis tests
+            └── ir/           Intermediate representation tests
 
 samples/                      Example .mini programs
 docs/                         Phase documentation
