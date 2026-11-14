@@ -1,3 +1,4 @@
+
 # COMPILER_GROUP_FIFTEEN — Mini-Language Compiler
 
 Term project (Group 15): a compiler for the class mini language, developed in five phases in one repository.
@@ -6,7 +7,7 @@ Term project (Group 15): a compiler for the class mini language, developed in fi
 |---|---|---|---|
 | 1 | Scanner (lexical analysis) | Done | 25 Oct 2026 |
 | 2 | Parser (syntax analysis) | In progress | 8 Nov 2026 |
-| 3 | Semantic analysis / IR | Not started | 22 Nov 2026 |
+| 3 | Semantic analysis / IR | In progress | 22 Nov 2026 |
 | 4 | Code generation | Not started | 6 Dec 2026 |
 | 5 | Optimizer + final demo | Not started | 13 Dec 2026 |
 
@@ -43,25 +44,36 @@ java -jar target/COMPILER_GROUP_FIFTEEN-0.1.0-phase1.jar --tokens samples/hello.
 ## Project layout
 
 ```text
-src/main/java/compiler/
-    Main.java                 CLI entry point (--tokens)
-    lexer/                    Phase 1: lexical analysis
-    error/                    Lexical error collection
-    util/                     Token report printer
-
-src/test/java/compiler/
-    lexer/                    JUnit 5 scanner tests
+src/
+├── main/
+│   └── java/
+│       └── compiler/
+│           ├── Main.java
+│           ├── ast/          Abstract syntax tree components
+│           ├── lexer/        Phase 1: lexical analysis
+│           ├── parser/       Phase 2: syntax analysis
+│           ├── semantic/     Phase 3: semantic analysis
+│           ├── ir/           Phase 3: intermediate representation
+│           ├── error/        Error handling and reporting
+│           └── util/         Compiler utility classes
+└── test/
+    └── java/
+        └── compiler/
+            ├── ast/          AST tests
+            ├── lexer/        Scanner tests
+            ├── parser/       Parser tests
+            ├── semantic/     Semantic analysis tests
+            └── ir/           Intermediate representation tests
 
 samples/                      Example .mini programs
 docs/                         Phase documentation
 ```
 
-The parser and abstract syntax tree (AST) components will be added during Phase 2.
-
 ## Documentation
 
 - `docs/PHASE1_SCANNER.md` — scanner token specification.
 - `docs/PHASE2_PARSER.md` — parser grammar, operator precedence, AST structure, and syntax error recovery.
+- `docs/PHASE3_SEMANTIC.md` — semantic analysis rules, scope management, type checking, and intermediate representation design.
 
 ## Team — Group 15
 
@@ -81,3 +93,5 @@ The parser and abstract syntax tree (AST) components will be added during Phase 
 For details about the scanner, see `docs/PHASE1_SCANNER.md`.
 
 For the grammar and parser design, see `docs/PHASE2_PARSER.md`.
+
+For semantic analysis and intermediate representation, see `docs/PHASE3_SEMANTIC.md`.
