@@ -1,0 +1,12 @@
+// syntax_errors.mini - scans fine, but contains deliberate syntax errors
+int x = 5
+print x;
+if x > 3 {
+ print "big";
+}
+y = ;
+while (x > 0 {
+ x = x - 1;
+}
+print (x + 1;
+print "done";

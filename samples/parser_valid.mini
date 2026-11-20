@@ -1,0 +1,15 @@
+// parser_valid.mini - valid program that uses every statement and operator group
+int a = 7;
+int b;
+string name = "Group 15";
+b = (a + 3) * 2 - -1;
+if (a > 5 && !(b == 0)) {
+ print "a is big";
+} else {
+ print 3.5 * a % 2;
+}
+while (a > 0) {
+ a = a - 1;
+ if (a == 3) print name;
+ }
+ return;

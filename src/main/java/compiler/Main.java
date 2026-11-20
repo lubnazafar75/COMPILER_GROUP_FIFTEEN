@@ -1,8 +1,11 @@
 package compiler;
 
+import compiler.ast.Program;
 import compiler.error.ErrorReporter;
 import compiler.lexer.Lexer;
 import compiler.lexer.Token;
+import compiler.parser.Parser;
+import compiler.util.AstPrinter;
 import compiler.util.TokenPrinter;
 
 import java.io.IOException;
@@ -15,14 +18,16 @@ import java.util.List;
 /**
  * Command-line entry point for the compiler.
  *
- *   Usage:  java -jar compiler-group-fifteen.jar --tokens <file.mini>
- *   In IntelliJ: Run > Edit Configurations > Program arguments:
- *           --tokens samples/hello.mini
+ *   Usage:  java -jar compiler-group-fifteen.jar --tokens <file.mini>   (Phase 1)
+ *           java -jar compiler-group-fifteen.jar --ast    <file.mini>   (Phase 2)
  *
- * Exit codes: 0 = success, 1 = lexical errors found,
- *             2 = wrong arguments, 3 = file could not be read.
+ *   In IntelliJ: Run > Edit Configurations > Program arguments, e.g.
+ *           --ast samples/parser_valid.mini
  *
- * Later phases add more modes here (e.g. --parse, --ir, --run).
+ * Exit codes: 0 = success, 1 = lexical errors, 2 = wrong arguments,
+ *             3 = file could not be read, 4 = syntax errors.
+ *
+ * Later phases add more modes here (e.g. --ir, --run).
  *
  * Owner: Mercy Atta Gyamfi (0164) - Team Lead
  */
@@ -32,6 +37,7 @@ public final class Main {
     public static final int LEXICAL_ERRORS = 1;
     public static final int USAGE_ERROR = 2;
     public static final int IO_ERROR = 3;
+    public static final int SYNTAX_ERRORS = 4;
 
     public static void main(String[] args) {
         System.exit(run(args, System.out, System.err));
@@ -39,10 +45,11 @@ public final class Main {
 
     /** Separated from main() so it can be tested without exiting the JVM. */
     public static int run(String[] args, PrintStream out, PrintStream err) {
-        if (args.length != 2 || !args[0].equals("--tokens")) {
+        if (args.length != 2 || !(args[0].equals("--tokens") || args[0].equals("--ast"))) {
             printUsage(err);
             return USAGE_ERROR;
         }
+        String mode = args[0];
 
         String source;
         try {
@@ -52,24 +59,59 @@ public final class Main {
             return IO_ERROR;
         }
 
-        ErrorReporter errors = new ErrorReporter();
-        Lexer lexer = new Lexer(source, errors);
-        List<Token> tokens = lexer.tokenize();
+        // Phase 1: scan.
+        ErrorReporter lexicalErrors = new ErrorReporter();
+        List<Token> tokens = new Lexer(source, lexicalErrors).tokenize();
 
-        out.println("Source file: " + args[1]);
+        if (mode.equals("--tokens")) {
+            return showTokens(args[1], tokens, lexicalErrors, out, err);
+        }
+        return showTree(args[1], tokens, lexicalErrors, out, err);
+    }
+
+    private static int showTokens(String file, List<Token> tokens, ErrorReporter lexicalErrors,
+                                  PrintStream out, PrintStream err) {
+        out.println("Source file: " + file);
         TokenPrinter.print(tokens, out);
 
-        if (errors.hasErrors()) {
+        if (lexicalErrors.hasErrors()) {
             err.println();
-            err.println(errors.count() + " lexical error(s) found:");
-            errors.printAll(err);
+            err.println(lexicalErrors.count() + " lexical error(s) found:");
+            lexicalErrors.printAll(err);
             return LEXICAL_ERRORS;
         }
         out.println("Scan completed with no lexical errors.");
         return OK;
     }
 
+    private static int showTree(String file, List<Token> tokens, ErrorReporter lexicalErrors,
+                                PrintStream out, PrintStream err) {
+        out.println("Source file: " + file);
+
+        // Do not parse a program the scanner already rejected.
+        if (lexicalErrors.hasErrors()) {
+            err.println(lexicalErrors.count() + " lexical error(s) found - fix these before parsing:");
+            lexicalErrors.printAll(err);
+            return LEXICAL_ERRORS;
+        }
+
+        // Phase 2: parse.
+        Parser parser = new Parser(tokens);
+        Program program = parser.parse();
+
+        if (parser.getErrors().hasErrors()) {
+            err.println(parser.getErrors().count() + " syntax error(s) found:");
+            parser.getErrors().printAll(err);
+            return SYNTAX_ERRORS;
+        }
+
+        out.print(AstPrinter.print(program));
+        out.println("Parse completed with no syntax errors.");
+        return OK;
+    }
+
     private static void printUsage(PrintStream err) {
         err.println("Usage: java -jar compiler-group-fifteen.jar --tokens <file.mini>");
+        err.println("       java -jar compiler-group-fifteen.jar --ast    <file.mini>");
     }
 }
