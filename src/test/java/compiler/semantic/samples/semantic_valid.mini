@@ -1,0 +1,22 @@
+// semantic_valid.mini - parses AND makes sense: no semantic errors.
+// Uses every type rule: declarations, scopes, numbers, strings and bools.
+int count = 0;
+int limit;
+string label = "Total so far: ";
+input limit;
+while (count < limit && limit > 0) {
+    count = count + 1;
+    // A block opens a new scope, so this "step" is a different variable
+    // from any "step" outside the block.
+    {
+    }
+        int step = count * 2;
+        print step;
+    if (count == 3 || count == 7) {
+        print label;
+    } else {
+        print count;
+    }
+}
+print label + "done";
+return count;
