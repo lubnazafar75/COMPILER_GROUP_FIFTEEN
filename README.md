@@ -6,7 +6,7 @@ Term project (Group 15): a compiler for the class mini language, built in five p
 |---|---|---|---|
 | 1 | Scanner (lexical analysis) | Done | 25 Oct 2026 |
 | 2 | Parser (syntax analysis) | Done | 8 Nov 2026 |
-| 3 | Semantic analysis / IR | Not started | 22 Nov 2026 |
+| 3 | Semantic analysis / IR | In progress | 22 Nov 2026 |
 | 4 | Code generation | Not started | 6 Dec 2026 |
 | 5 | Optimizer + final demo | Not started | 13 Dec 2026 |
 
