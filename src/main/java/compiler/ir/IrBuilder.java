@@ -9,7 +9,7 @@ import java.util.List;
  * Each is handed out once and never reused, so two different values can
  * never end up sharing a name.
  *
- * Owner: Lubna Zafar (0167)
+ *  Lubna Zafar (0167)
  */
 public final class IrBuilder {
     private final List<IrInstruction> instructions = new ArrayList<>();
