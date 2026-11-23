@@ -13,14 +13,13 @@ import java.util.Set;
 /**
  * Manages token access for the parser, including token consumption,
  * syntax error reporting, and error recovery.
- *
- * Owner: Michael Addo (0159)
  */
 public final class TokenStream {
 
     private static final Set<TokenType> STATEMENT_STARTS = EnumSet.of(
-            TokenType.INT, TokenType.STRING, TokenType.INPUT, TokenType.PRINT,
-            TokenType.IF, TokenType.WHILE, TokenType.RETURN
+            TokenType.INT, TokenType.STRING, TokenType.INPUT,
+            TokenType.PRINT, TokenType.IF, TokenType.WHILE,
+            TokenType.RETURN
     );
 
     private final List<Token> tokens;
@@ -30,9 +29,14 @@ public final class TokenStream {
     public TokenStream(List<Token> tokens, SyntaxErrorReporter errors) {
         List<Token> copy = new ArrayList<>(tokens);
 
-        if (copy.isEmpty() || copy.get(copy.size() - 1).getType() != TokenType.EOF) {
-            int line = copy.isEmpty() ? 1 : copy.get(copy.size() - 1).getLine();
-            int column = copy.isEmpty() ? 1 : copy.get(copy.size() - 1).getColumn();
+        if (copy.isEmpty()
+                || copy.get(copy.size() - 1).getType() != TokenType.EOF) {
+
+            int line = copy.isEmpty()
+                    ? 1 : copy.get(copy.size() - 1).getLine();
+
+            int column = copy.isEmpty()
+                    ? 1 : copy.get(copy.size() - 1).getColumn();
 
             copy.add(new Token(TokenType.EOF, "", line, column));
         }
@@ -93,7 +97,8 @@ public final class TokenStream {
     public ParseException expectedError(String expected) {
         Token found = peek();
 
-        String message = "Expected " + expected + ", but found " + describe(found);
+        String message = "Expected " + expected
+                + ", but found " + describe(found);
 
         if (position > 0 && found.getLine() > previous().getLine()) {
             Token before = previous();
@@ -128,7 +133,8 @@ public final class TokenStream {
                     return;
                 }
 
-                if (type == TokenType.RBRACE || STATEMENT_STARTS.contains(type)) {
+                if (type == TokenType.RBRACE
+                        || STATEMENT_STARTS.contains(type)) {
                     return;
                 }
             }

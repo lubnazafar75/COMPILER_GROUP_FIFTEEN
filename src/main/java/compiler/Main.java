@@ -1,11 +1,16 @@
+
 package compiler;
 
 import compiler.ast.Program;
 import compiler.error.ErrorReporter;
+import compiler.ir.IrGenerator;
+import compiler.ir.IrProgram;
 import compiler.lexer.Lexer;
 import compiler.lexer.Token;
 import compiler.parser.Parser;
+import compiler.semantic.SemanticAnalyzer;
 import compiler.util.AstPrinter;
+import compiler.util.IrPrinter;
 import compiler.util.TokenPrinter;
 
 import java.io.IOException;
@@ -15,22 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/**
- * Command-line entry point for the compiler.
- *
- *   Usage:  java -jar compiler-group-fifteen.jar --tokens <file.mini>   (Phase 1)
- *           java -jar compiler-group-fifteen.jar --ast    <file.mini>   (Phase 2)
- *
- *   In IntelliJ: Run > Edit Configurations > Program arguments, e.g.
- *           --ast samples/parser_valid.mini
- *
- * Exit codes: 0 = success, 1 = lexical errors, 2 = wrong arguments,
- *             3 = file could not be read, 4 = syntax errors.
- *
- * Later phases add more modes here (e.g. --ir, --run).
- *
- * Owner: Mercy Atta Gyamfi (0164) - Team Lead
- */
 public final class Main {
 
     public static final int OK = 0;
@@ -38,80 +27,120 @@ public final class Main {
     public static final int USAGE_ERROR = 2;
     public static final int IO_ERROR = 3;
     public static final int SYNTAX_ERRORS = 4;
+    public static final int SEMANTIC_ERRORS = 5;
+
+    private static final List<String> MODES =
+            List.of("--tokens", "--ast", "--check", "--ir");
 
     public static void main(String[] args) {
         System.exit(run(args, System.out, System.err));
     }
 
-    /** Separated from main() so it can be tested without exiting the JVM. */
     public static int run(String[] args, PrintStream out, PrintStream err) {
-        if (args.length != 2 || !(args[0].equals("--tokens") || args[0].equals("--ast"))) {
+
+        if (args.length != 2 || !MODES.contains(args[0])) {
             printUsage(err);
             return USAGE_ERROR;
         }
-        String mode = args[0];
 
+        String mode = args[0];
         String source;
+
         try {
-            source = Files.readString(Path.of(args[1]), StandardCharsets.UTF_8);
+            source = Files.readString(
+                    Path.of(args[1]), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            err.println("Error: cannot read file '" + args[1] + "' (" + e.getMessage() + ")");
+            err.println("Error: cannot read file '" + args[1]
+                    + "' (" + e.getMessage() + ")");
             return IO_ERROR;
         }
 
-        // Phase 1: scan.
+        out.println("Source file: " + args[1]);
+
+        // Phase 1: scanning
         ErrorReporter lexicalErrors = new ErrorReporter();
         List<Token> tokens = new Lexer(source, lexicalErrors).tokenize();
 
         if (mode.equals("--tokens")) {
-            return showTokens(args[1], tokens, lexicalErrors, out, err);
+            return showTokens(tokens, lexicalErrors, out, err);
         }
-        return showTree(args[1], tokens, lexicalErrors, out, err);
-    }
-
-    private static int showTokens(String file, List<Token> tokens, ErrorReporter lexicalErrors,
-                                  PrintStream out, PrintStream err) {
-        out.println("Source file: " + file);
-        TokenPrinter.print(tokens, out);
 
         if (lexicalErrors.hasErrors()) {
-            err.println();
-            err.println(lexicalErrors.count() + " lexical error(s) found:");
-            lexicalErrors.printAll(err);
-            return LEXICAL_ERRORS;
-        }
-        out.println("Scan completed with no lexical errors.");
-        return OK;
-    }
-
-    private static int showTree(String file, List<Token> tokens, ErrorReporter lexicalErrors,
-                                PrintStream out, PrintStream err) {
-        out.println("Source file: " + file);
-
-        // Do not parse a program the scanner already rejected.
-        if (lexicalErrors.hasErrors()) {
-            err.println(lexicalErrors.count() + " lexical error(s) found - fix these before parsing:");
+            err.println(lexicalErrors.count()
+                    + " lexical error(s) found - fix these first:");
             lexicalErrors.printAll(err);
             return LEXICAL_ERRORS;
         }
 
-        // Phase 2: parse.
+        // Phase 2: parsing
         Parser parser = new Parser(tokens);
         Program program = parser.parse();
 
         if (parser.getErrors().hasErrors()) {
-            err.println(parser.getErrors().count() + " syntax error(s) found:");
-            parser.getErrors().printAll(err);
+            err.println(parser.getErrors().count()
+                    + " syntax error(s) found:");
+
+            parser.getErrors().getErrors().forEach(err::println);
+
             return SYNTAX_ERRORS;
         }
 
-        out.print(AstPrinter.print(program));
-        out.println("Parse completed with no syntax errors.");
+        if (mode.equals("--ast")) {
+            AstPrinter printer = new AstPrinter();
+            out.print(printer.print(program));
+            out.println("Parse completed with no syntax errors.");
+            return OK;
+        }
+
+        // Phase 3: semantic analysis
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        analyzer.analyze(program);
+
+        if (analyzer.getErrors().hasErrors()) {
+            err.println(analyzer.getErrors().count()
+                    + " semantic error(s) found:");
+            analyzer.getErrors().printAll(err);
+            return SEMANTIC_ERRORS;
+        }
+
+        if (mode.equals("--check")) {
+            out.println("Semantic analysis completed with no errors.");
+            return OK;
+        }
+
+        // Phase 3: intermediate representation
+        IrProgram ir = new IrGenerator().generate(program);
+        out.print(IrPrinter.print(ir));
+        out.println("Generated " + ir.size()
+                + " three-address instruction(s).");
+
+        return OK;
+    }
+
+    private static int showTokens(
+            List<Token> tokens,
+            ErrorReporter lexicalErrors,
+            PrintStream out,
+            PrintStream err) {
+
+        TokenPrinter.print(tokens, out);
+
+        if (lexicalErrors.hasErrors()) {
+            err.println();
+            err.println(lexicalErrors.count()
+                    + " lexical error(s) found:");
+            lexicalErrors.printAll(err);
+            return LEXICAL_ERRORS;
+        }
+
+        out.println("Scan completed with no lexical errors.");
         return OK;
     }
 
     private static void printUsage(PrintStream err) {
         err.println("Usage: java -jar compiler-group-fifteen.jar --tokens <file.mini>");
         err.println("       java -jar compiler-group-fifteen.jar --ast    <file.mini>");
+        err.println("       java -jar compiler-group-fifteen.jar --check  <file.mini>");
+        err.println("       java -jar compiler-group-fifteen.jar --ir     <file.mini>");
     }
 }
