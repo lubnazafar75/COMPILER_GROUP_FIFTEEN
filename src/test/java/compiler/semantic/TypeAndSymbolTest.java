@@ -49,7 +49,6 @@ class TypeAndSymbolTest {
     @Test
     void symbolKeepsItsNameTypeAndPosition() {
         Symbol symbol = new Symbol("total", Type.INT, 7, 5);
-
         assertEquals("total", symbol.name());
         assertEquals(Type.INT, symbol.type());
         assertEquals(7, symbol.line());
@@ -58,22 +57,14 @@ class TypeAndSymbolTest {
 
     @Test
     void symbolDescribesItselfForErrorMessages() {
-        assertEquals(
-                "int total (declared on line 7)",
-                new Symbol("total", Type.INT, 7, 5).describe()
-        );
-
-        assertEquals(
-                "string name (declared on line 1)",
-                new Symbol("name", Type.STRING, 1, 8).describe()
-        );
+        assertEquals("int total (declared on line 7)",
+                new Symbol("total", Type.INT, 7, 5).describe());
+        assertEquals("string name (declared on line 1)",
+                new Symbol("name", Type.STRING, 1, 8).describe());
     }
 
     @Test
     void twoSymbolsWithTheSamePartsAreEqual() {
-        assertEquals(
-                new Symbol("x", Type.INT, 2, 3),
-                new Symbol("x", Type.INT, 2, 3)
-        );
+        assertEquals(new Symbol("x", Type.INT, 2, 3), new Symbol("x", Type.INT, 2, 3));
     }
 }
