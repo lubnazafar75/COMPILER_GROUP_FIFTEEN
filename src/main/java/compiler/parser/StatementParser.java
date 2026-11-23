@@ -1,13 +1,9 @@
-
 package compiler.parser;
 
 import compiler.ast.*;
 import compiler.lexer.Token;
 import compiler.lexer.TokenType;
 
-/**
- * Parses declarations and statements in the Mini language.
- */
 public final class StatementParser {
 
     private final TokenStream tokens;
@@ -41,7 +37,7 @@ public final class StatementParser {
         }
 
         if (tokens.match(TokenType.IF)) {
-            return ifStatement();
+            return ifStatement(tokens.previous());
         }
 
         if (tokens.match(TokenType.WHILE)) {
@@ -128,7 +124,7 @@ public final class StatementParser {
         return new PrintStmt(expression);
     }
 
-    private Stmt ifStatement() {
+    private Stmt ifStatement(Token keyword) {
         tokens.consume(
                 TokenType.LPAREN,
                 "'(' after 'if'"
@@ -149,7 +145,7 @@ public final class StatementParser {
             elseBranch = parseStatement();
         }
 
-        return new IfStmt(condition, thenBranch, elseBranch);
+        return new IfStmt(keyword, condition, thenBranch, elseBranch);
     }
 
     private Stmt whileStatement(Token keyword) {
