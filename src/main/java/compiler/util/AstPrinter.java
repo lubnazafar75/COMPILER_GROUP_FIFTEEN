@@ -1,199 +1,183 @@
+
 package compiler.util;
 
-import compiler.ast.AssignStmt;
-import compiler.ast.BinaryExpr;
-import compiler.ast.BlockStmt;
-import compiler.ast.Expr;
-import compiler.ast.GroupingExpr;
-import compiler.ast.IfStmt;
-import compiler.ast.InputStmt;
-import compiler.ast.LiteralExpr;
-import compiler.ast.PrintStmt;
-import compiler.ast.Program;
-import compiler.ast.ReturnStmt;
-import compiler.ast.Stmt;
-import compiler.ast.UnaryExpr;
-import compiler.ast.VarDeclStmt;
-import compiler.ast.VariableExpr;
-import compiler.ast.WhileStmt;
+import compiler.ast.*;
 
-/**
- * Prints a syntax tree as an indented outline, one node per line. Children
- * are indented two spaces more than their parent.
- *
- *   Program
- *     VarDecl int total
- *       Literal 0
- *     While
- *       Condition
- *         Binary >
- *           Variable n
- *           Literal 0
- *       Body
- *         ...
- *
- * It is a Visitor: it implements both visitor interfaces, so each node
- * type has exactly one method here that decides how it is printed.
- *
- */
-public final class AstPrinter implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
+public final class AstPrinter
+        implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
-    private final StringBuilder out = new StringBuilder();
     private int depth = 0;
 
-    private AstPrinter() { }
+    private String indent() {
+        return "  ".repeat(depth);
+    }
 
-    /** Returns the whole tree as text; every line ends with a newline. */
-    public static String print(Program program) {
-        AstPrinter printer = new AstPrinter();
-        printer.line("Program");
-        printer.depth++;
+    private String node(String name) {
+        return indent() + name + "\n";
+    }
+
+    private String child(Object child) {
+        depth++;
+        try {
+            if (child instanceof Expr expression) {
+                return expression.accept(this);
+            }
+            if (child instanceof Stmt statement) {
+                return statement.accept(this);
+            }
+            return "";
+        } finally {
+            depth--;
+        }
+    }
+
+    public String print(Program program) {
+        depth = 0;
+        StringBuilder result = new StringBuilder("Program\n");
+
         for (Stmt statement : program.statements()) {
-            statement.accept(printer);
+            result.append(child(statement));
         }
-        return printer.out.toString();
+
+        return result.toString();
     }
 
-    private void line(String text) {
-        out.append("  ".repeat(depth)).append(text).append('\n');
+    public String printExpression(Expr expression) {
+        depth = 0;
+        return expression.accept(this);
     }
 
-    /** Prints a label line, then the child node one level deeper. */
-    private void labelledStmt(String label, Stmt child) {
-        line(label);
-        depth++;
-        child.accept(this);
-        depth--;
-    }
-
-    private void labelledExpr(String label, Expr child) {
-        line(label);
-        depth++;
-        child.accept(this);
-        depth--;
-    }
-
-    // ---- Statements -----------------------------------------------------------
+    // Expression visitors
 
     @Override
-    public Void visitVarDecl(VarDeclStmt stmt) {
-        line("VarDecl " + stmt.type().getLexeme() + " " + stmt.name().getLexeme());
+    public String visitBinary(BinaryExpr expr) {
+        return node("Binary " + expr.operator().getLexeme())
+                + child(expr.left())
+                + child(expr.right());
+    }
+
+    @Override
+    public String visitUnary(UnaryExpr expr) {
+        return node("Unary " + expr.operator().getLexeme())
+                + child(expr.operand());
+    }
+
+    @Override
+    public String visitLiteral(LiteralExpr expr) {
+        return node("Literal " + expr.text());
+    }
+
+    @Override
+    public String visitVariable(VariableExpr expr) {
+        return node("Variable " + expr.name().getLexeme());
+    }
+
+    @Override
+    public String visitGrouping(GroupingExpr expr) {
+        return node("Group") + child(expr.expression());
+    }
+
+    // Statement visitors
+
+    @Override
+    public String visitVarDecl(VarDeclStmt stmt) {
+        String result = node(
+                "VarDecl " + stmt.type().getLexeme()
+                        + " " + stmt.name().getLexeme()
+        );
+
         if (stmt.initializer() != null) {
-            depth++;
-            stmt.initializer().accept(this);
-            depth--;
+            result += child(stmt.initializer());
         }
-        return null;
+
+        return result;
     }
 
     @Override
-    public Void visitAssign(AssignStmt stmt) {
-        line("Assign " + stmt.name().getLexeme());
-        depth++;
-        stmt.value().accept(this);
-        depth--;
-        return null;
+    public String visitAssign(AssignStmt stmt) {
+        return node("Assign " + stmt.name().getLexeme())
+                + child(stmt.value());
     }
 
     @Override
-    public Void visitInput(InputStmt stmt) {
-        line("Input " + stmt.name().getLexeme());
-        return null;
+    public String visitInput(InputStmt stmt) {
+        return node("Input " + stmt.name().getLexeme());
     }
 
     @Override
-    public Void visitPrint(PrintStmt stmt) {
-        line("Print");
-        depth++;
-        stmt.expression().accept(this);
-        depth--;
-        return null;
+    public String visitPrint(PrintStmt stmt) {
+        return node("Print") + child(stmt.expression());
     }
 
     @Override
-    public Void visitIf(IfStmt stmt) {
-        line("If");
-        depth++;
-        labelledExpr("Condition", stmt.condition());
-        labelledStmt("Then", stmt.thenBranch());
+    public String visitIf(IfStmt stmt) {
+        StringBuilder result = new StringBuilder(node("If"));
+
+        result.append(nodeAtChild("Condition", stmt.condition()));
+        result.append(nodeAtChild("Then", stmt.thenBranch()));
+
         if (stmt.elseBranch() != null) {
-            labelledStmt("Else", stmt.elseBranch());
-        }
-        depth--;
-        return null;
-    }
-
-    @Override
-    public Void visitWhile(WhileStmt stmt) {
-        line("While");
-        depth++;
-        labelledExpr("Condition", stmt.condition());
-        labelledStmt("Body", stmt.body());
-        depth--;
-        return null;
-    }
-
-    @Override
-    public Void visitReturn(ReturnStmt stmt) {
-        line("Return");
-        if (stmt.value() != null) {
             depth++;
-            stmt.value().accept(this);
+            try {
+                result.append(node("Else"));
+                result.append(child(stmt.elseBranch()));
+            } finally {
+                depth--;
+            }
+        }
+
+        return result.toString();
+    }
+
+    @Override
+    public String visitWhile(WhileStmt stmt) {
+        StringBuilder result = new StringBuilder(node("While"));
+
+        result.append(nodeAtChild("Condition", stmt.condition()));
+        result.append(nodeAtChild("Body", stmt.body()));
+
+        return result.toString();
+    }
+
+    private String nodeAtChild(String label, Object value) {
+        depth++;
+        try {
+            String result = node(label);
+            depth++;
+            try {
+                if (value instanceof Expr expression) {
+                    result += expression.accept(this);
+                } else if (value instanceof Stmt statement) {
+                    result += statement.accept(this);
+                }
+            } finally {
+                depth--;
+            }
+            return result;
+        } finally {
             depth--;
         }
-        return null;
     }
 
     @Override
-    public Void visitBlock(BlockStmt stmt) {
-        line("Block");
-        depth++;
-        for (Stmt inner : stmt.statements()) {
-            inner.accept(this);
+    public String visitReturn(ReturnStmt stmt) {
+        String result = node("Return");
+
+        if (stmt.value() != null) {
+            result += child(stmt.value());
         }
-        depth--;
-        return null;
-    }
 
-    // ---- Expressions ----------------------------------------------------------
-
-    @Override
-    public Void visitBinary(BinaryExpr expr) {
-        line("Binary " + expr.operator().getLexeme());
-        depth++;
-        expr.left().accept(this);
-        expr.right().accept(this);
-        depth--;
-        return null;
+        return result;
     }
 
     @Override
-    public Void visitUnary(UnaryExpr expr) {
-        line("Unary " + expr.operator().getLexeme());
-        depth++;
-        expr.operand().accept(this);
-        depth--;
-        return null;
-    }
+    public String visitBlock(BlockStmt stmt) {
+        StringBuilder result = new StringBuilder(node("Block"));
 
-    @Override
-    public Void visitLiteral(LiteralExpr expr) {
-        line("Literal " + expr.text());
-        return null;
-    }
+        for (Stmt statement : stmt.statements()) {
+            result.append(child(statement));
+        }
 
-    @Override
-    public Void visitVariable(VariableExpr expr) {
-        line("Variable " + expr.name().getLexeme());
-        return null;
-    }
-
-    @Override
-    public Void visitGrouping(GroupingExpr expr) {
-        line("Group");
-        depth++;
-        expr.expression().accept(this);
-        depth--;
-        return null;
+        return result.toString();
     }
 }

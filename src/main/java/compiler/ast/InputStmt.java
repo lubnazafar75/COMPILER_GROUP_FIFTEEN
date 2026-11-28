@@ -1,10 +1,10 @@
 package compiler.ast;
 
+
 import compiler.lexer.Token;
 
 /**
- * Reads a value from the user into a variable:  input n;
- *
+ * Represents an input statement.
  */
 public record InputStmt(Token name) implements Stmt {
 

@@ -1,0 +1,12 @@
+// semantic_errors.mini - scans and parses correctly, but does not make
+// sense. Six deliberate semantic errors, one per numbered comment.
+int x = 5;
+int x = 7; // 1. x is already declared in this scope
+y = 10; // 2. y was never declared
+string name = "Lubna";
+x = name; // 3. a string value cannot go in an int variable
+print x + name; // 4. + cannot be used with int and string
+if (x) { // 5. the condition must be a bool, not an int
+ print total; // 6. total was never declared
+}
+return x;
