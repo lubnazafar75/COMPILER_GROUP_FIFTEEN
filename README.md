@@ -1,5 +1,24 @@
 # COMPILER_GROUP_FIFTEEN — Mini-Language Compiler
 
+Group Members 
+1. philipessel177-ctr : PS/CSC/23/0157
+2. kwadwofokuo88 : PS/CSC/23/0158
+3. michael-addo-0x : PS/CSC/23/0159
+4. Alexxes : PS/CSC/23/0160
+5. LightenStar13 : PS/CSC/23/0161
+6. egminejames5-creat : PS/CSC/23/0163
+7. missAttaGyamfi : PS/CSC/23/0164
+8. lubnazafar75 : PS/CSC/23/0167
+9. bariamahmood : PS/CSC/23/0169
+10. Oliversedinam : PS/CSC/23/0170
+
+
+
+
+
+
+
+
 Term project (Group 15): a compiler for the class mini language, built in five phases in this one repository.
 
 | Phase | Deliverable | Status | Deadline |
