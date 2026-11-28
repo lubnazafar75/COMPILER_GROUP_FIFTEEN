@@ -3,7 +3,7 @@
 Group Members 
 1. philipessel177-ctr : PS/CSC/23/0157
 2. kwadwofokuo88 : PS/CSC/23/0158
-3. michael-addo-0x : PS/CSC/23/0159
+3. michael-addo-0x1 : PS/CSC/23/0159
 4. Alexxes : PS/CSC/23/0160
 5. LightenStar13 : PS/CSC/23/0161
 6. egminejames5-creat : PS/CSC/23/0163
